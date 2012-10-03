@@ -123,52 +123,52 @@ BOOST_AUTO_TEST_CASE(get_test)
 
     // get bool
     bool out_bool_value;
-    mrbp::get(nil_value, out_bool_value);
+    mrbp::get(mrb, nil_value, out_bool_value);
     BOOST_CHECK( !out_bool_value );
-    mrbp::get(true_value, out_bool_value);
+    mrbp::get(mrb, true_value, out_bool_value);
     BOOST_CHECK( out_bool_value );
-    mrbp::get(false_value, out_bool_value);
+    mrbp::get(mrb, false_value, out_bool_value);
     BOOST_CHECK( !out_bool_value );
-    mrbp::get(int_value, out_bool_value);
+    mrbp::get(mrb, int_value, out_bool_value);
     BOOST_CHECK( out_bool_value );
-    mrbp::get(float_value, out_bool_value);
+    mrbp::get(mrb, float_value, out_bool_value);
     BOOST_CHECK( out_bool_value );
 
     // get int
     mrb_int out_int_value;
-    mrbp::get(nil_value, out_int_value);
+    mrbp::get(mrb, nil_value, out_int_value);
     BOOST_CHECK( out_int_value == 0 );
-    BOOST_CHECK_THROW( mrbp::get(true_value, out_int_value), std::exception );
-    mrbp::get(false_value, out_int_value);
+    BOOST_CHECK_THROW( mrbp::get(mrb, true_value, out_int_value), std::exception );
+    mrbp::get(mrb, false_value, out_int_value);
     BOOST_CHECK( out_int_value == 0 );
-    mrbp::get(int_value, out_int_value);
+    mrbp::get(mrb, int_value, out_int_value);
     BOOST_CHECK( out_int_value == 1 );
-    mrbp::get(float_value, out_int_value);
+    mrbp::get(mrb, float_value, out_int_value);
     BOOST_CHECK( out_int_value == 0 );
 
     // get float
     mrb_float out_float_value;
-    mrbp::get(nil_value, out_float_value);
+    mrbp::get(mrb, nil_value, out_float_value);
     BOOST_CHECK( out_float_value == 0 );
-    BOOST_CHECK_THROW( mrbp::get(true_value, out_float_value), std::exception );
-    mrbp::get(false_value, out_float_value);
+    BOOST_CHECK_THROW( mrbp::get(mrb, true_value, out_float_value), std::exception );
+    mrbp::get(mrb, false_value, out_float_value);
     BOOST_CHECK( out_float_value == 0 );
-    mrbp::get(int_value, out_float_value);
+    mrbp::get(mrb, int_value, out_float_value);
     BOOST_CHECK( out_float_value == 1 );
-    mrbp::get(float_value, out_float_value);
+    mrbp::get(mrb, float_value, out_float_value);
     BOOST_CHECK( out_float_value == 0.5 );
 
     // get mrb_value
     mrb_value out_value;
-    mrbp::get(nil_value, out_value);
+    mrbp::get(mrb, nil_value, out_value);
     BOOST_CHECK(mrb_obj_equal(mrb, nil_value, out_value));
-    mrbp::get(true_value, out_value);
+    mrbp::get(mrb, true_value, out_value);
     BOOST_CHECK(mrb_obj_equal(mrb, true_value, out_value));
-    mrbp::get(false_value, out_value);
+    mrbp::get(mrb, false_value, out_value);
     BOOST_CHECK(mrb_obj_equal(mrb, false_value, out_value));
-    mrbp::get(int_value, out_value);
+    mrbp::get(mrb, int_value, out_value);
     BOOST_CHECK(mrb_obj_equal(mrb, int_value, out_value));
-    mrbp::get(float_value, out_value);
+    mrbp::get(mrb, float_value, out_value);
     BOOST_CHECK(mrb_obj_equal(mrb, float_value, out_value));
 }
 
