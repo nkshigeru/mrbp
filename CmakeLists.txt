@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 2.6)
+project(mrbp)
+
+#boost
+set(BOOST_DIR "" CACHE PATH "boost directory")
+set(BOOST_LIB_DIR "" CACHE PATH "boost library directory")
+include_directories(${BOOST_DIR})
+link_directories(${BOOST_LIB_DIR})
+
+#mruby
+set(MRUBY_DIR "" CACHE PATH "mruby directory")
+set(MRUBY_LIB_DIR "" CACHE PATH "boost directory")
+include_directories("${MRUBY_DIR}/include")
+list(APPEND MRUBY_LIBS
+	"${MRUBY_LIB_DIR}/mruby.lib"
+)
+
+#mrbp
+include_directories("include")
+
+add_subdirectory(example)
