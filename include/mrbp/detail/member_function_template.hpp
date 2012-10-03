@@ -42,12 +42,9 @@
 	A##i a##i; get(mrb->stack[(i)+(offset)+1], a##i);
 
 template<typename R, typename T MRBP_COMMA MRBP_TEMPLATE_PARMS>
-static inline mrb_value call(R (T::*f)(MRBP_TEMPLATE_ARGS), T* thiz MRBP_COMMA MRBP_FUNTION_ARGS);//TODO
-
-template<typename T MRBP_COMMA MRBP_TEMPLATE_PARMS>
-static inline mrb_value call(mrb_value (T::*f)(MRBP_TEMPLATE_ARGS), T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)
+static inline mrb_value call(R (T::*f)(MRBP_TEMPLATE_ARGS), T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)
 {
-    return (thiz->*f)(MRBP_CALL_ARGS);
+    return value((thiz->*f)(MRBP_CALL_ARGS));
 }
 
 template<typename T MRBP_COMMA MRBP_TEMPLATE_PARMS>

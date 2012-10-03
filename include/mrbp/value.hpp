@@ -37,6 +37,11 @@ static inline mrb_value value(int v)
     return mrb_fixnum_value(v);
 }
 
+static inline mrb_value value(mrb_value v)
+{
+    return v;
+}
+
 template<typename T>
 static inline bool check(mrb_value value);
 
