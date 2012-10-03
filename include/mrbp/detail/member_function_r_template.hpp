@@ -39,7 +39,7 @@
 // ==> a0, a1, a2
 
 #define MRBP_GET_ARGS(x, i, offset) \
-	A##i a##i; get(mrb->stack[(i)+(offset)+1], a##i);
+	A##i a##i; get(mrb, mrb->stack[(i)+(offset)+1], a##i);
 
 template<typename R, typename T MRBP_COMMA MRBP_TEMPLATE_PARMS>
 static inline mrb_value call(R (T::*f)(mrb_state*, mrb_value MRBP_COMMA MRBP_TEMPLATE_ARGS), mrb_state* mrb, mrb_value self, T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)

@@ -26,6 +26,8 @@
 #include <mruby.h>
 #include <mruby/numeric.h>
 
+#include <stdexcept>
+
 namespace mrbp {
 
 //nil
@@ -99,12 +101,12 @@ static inline bool check<mrb_value>(mrb_value value)
 	return true;
 }
 
-static inline void get(mrb_value value, bool& out)
+static inline void get(mrb_state* mrb, mrb_value value, bool& out)
 {
 	out = (mrb_type(value) != MRB_TT_FALSE);
 }
 
-static inline void get(mrb_value value, mrb_int& out)
+static inline void get(mrb_state* mrb, mrb_value value, mrb_int& out)
 {
     switch (mrb_type(value))
     {
@@ -130,7 +132,7 @@ static inline void get(mrb_value value, mrb_int& out)
     }
 }
 
-static inline void get(mrb_value value, mrb_float& out)
+static inline void get(mrb_state* mrb, mrb_value value, mrb_float& out)
 {
     switch (mrb_type(value))
     {
@@ -149,12 +151,17 @@ static inline void get(mrb_value value, mrb_float& out)
     }
 }
 
-static inline void get(mrb_value value, mrb_value& out)
+static inline void get(mrb_state* mrb, mrb_value value, mrb_value& out)
 {
 	out = value;
 }
 
-
+template<typename T>
+static inline void get(mrb_state* mrb, mrb_value value, T*& out)
+{
+    //TODO check
+    out = (T*)mrb_get_datatype(mrb, value, mrbp::class_def<T>::data_type());
+}
 
 }
 
