@@ -103,6 +103,13 @@ struct class_init
     {
         return define_method(func_name, fdef.func(), fdef.aspec());
     }
+    
+    template<typename V>
+    class_init<T>& define_const(const char* name, V v)
+    {
+        mrb_define_const(mrb, cls, name, value(v));
+        return *this;
+    }
 	
 	mrb_state* mrb;
     RClass* cls;
