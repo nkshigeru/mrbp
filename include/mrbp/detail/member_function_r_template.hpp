@@ -39,7 +39,7 @@
 // ==> a0, a1, a2
 
 #define MRBP_GET_ARGS(x, i, offset) \
-	A##i a##i; get(mrb, mrb->stack[(i)+(offset)+1], a##i);
+	arg_holder<A##i>::type a##i; get(mrb, mrb->stack[(i)+(offset)+1], a##i);
 
 template<typename R, typename T MRBP_COMMA MRBP_TEMPLATE_PARMS>
 static inline mrb_value call(R (T::*f)(mrb_state*, mrb_value MRBP_COMMA MRBP_TEMPLATE_ARGS), mrb_state* mrb, mrb_value self, T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)
@@ -59,16 +59,17 @@ struct MRBP_FUNCTION
     : function_base<MRBP_FUNCTION<R, T MRBP_COMMA MRBP_TEMPLATE_ARGS, f> >,
       function_aspec<MRBP_NUM_ARGS>
 {
-    static mrb_value Func(mrb_state* mrb, mrb_value self)
+    static mrb_value AS_METHOD(mrb_state* mrb, mrb_value self)
     {
-        T* thiz = (T*)mrb_get_datatype(mrb, self, mrbp::class_def<T>::data_type());
+        T* thiz = 0;
+        get(mrb, self, thiz);
         if (thiz)
         {
-            return Func1(mrb, self, thiz);
+            return MemberFunc1(mrb, self, thiz);
         }
         return mrbp::value();
     }
-    static mrb_value Func1(mrb_state* mrb, mrb_value self, T* thiz)
+    static mrb_value MemberFunc1(mrb_state* mrb, mrb_value self, T* thiz)
     {
         if (mrb->ci->argc >= MRBP_NUM_ARGS)
         {

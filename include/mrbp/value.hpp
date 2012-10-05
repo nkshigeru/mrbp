@@ -25,6 +25,7 @@
 
 #include <mruby.h>
 #include <mruby/numeric.h>
+#include <mruby/string.h>
 
 #include <stdexcept>
 
@@ -148,6 +149,16 @@ static inline void get(mrb_state* mrb, mrb_value value, mrb_float& out)
     default:
         throw std::invalid_argument("can't convert to float");
         break;
+    }
+}
+
+static inline void get(mrb_state* mrb, mrb_value value, std::string& out)
+{
+    mrb_value temp = mrb_check_convert_type(mrb, value, MRB_TT_STRING, "String", "to_str");
+    if (mrb_type(temp) == MRB_TT_STRING)
+    {
+        struct RString* s = mrb_str_ptr(temp);
+        out.assign(s->ptr, s->len);
     }
 }
 

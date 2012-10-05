@@ -78,6 +78,10 @@ struct class_init
         cls = mrb_define_class(mrb, class_def_t::name(), mrb->object_class);
         MRB_SET_INSTANCE_TT(cls, MRB_TT_DATA);
     }
+
+    class_init<T>(mrb_state* mrb, struct RClass* cls) : mrb(mrb), cls(cls)
+    {
+    }
 	
     template<typename FDef>
     class_init<T>& define_initialize(FDef& fdef)
@@ -98,10 +102,22 @@ struct class_init
         return *this;
     }
 
-    template<typename FDef>
-    class_init<T>& define_method(const char* func_name, FDef& fdef)
+    template<typename F>
+    class_init<T>& define_method(const char* func_name, F& f)
     {
-        return define_method(func_name, fdef.func(), fdef.aspec());
+        return define_method(func_name, &F::AS_METHOD, f.aspec());
+    }
+
+    class_init<T>& define_class_method(const char* func_name, mrb_func_t func, int aspec)
+    {
+        mrb_define_class_method(mrb, cls, func_name, func, aspec);
+        return *this;
+    }
+
+    template<typename F>
+    class_init<T>& define_class_method(const char* func_name, F& f)
+    {
+        return define_class_method(func_name, &F::AS_CLASS_METHOD, f.aspec());
     }
     
     template<typename V>
@@ -112,7 +128,7 @@ struct class_init
     }
 	
 	mrb_state* mrb;
-    RClass* cls;
+    struct RClass* cls;
 
 private:
     class_init<T>();

@@ -33,6 +33,24 @@
 
 namespace mrbp {
 
+template<typename T>
+struct arg_holder
+{
+    typedef T type;
+};
+
+template<typename T>
+struct arg_holder<const T*>
+{
+    typedef T* type;
+};
+
+template<typename T>
+struct arg_holder<const T&>
+{
+    typedef T type;
+};
+
 template<int N>
 struct function_aspec
 {
@@ -78,7 +96,7 @@ struct initialize_function : function_base<initialize_function<T, F> >, function
         DATA_PTR(self) = static_cast<void*>(thiz);
         DATA_TYPE(self) = class_def<T>::data_type();
 
-        F::Func1(mrb, self, thiz);
+        F::MemberFunc1(mrb, self, thiz);
 
         return self;
     }

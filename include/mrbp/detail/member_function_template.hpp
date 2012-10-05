@@ -39,41 +39,46 @@
 // ==> a0, a1, a2
 
 #define MRBP_GET_ARGS(x, i, offset) \
-	A##i a##i; get(mrb, mrb->stack[(i)+(offset)+1], a##i);
-
-template<typename R, typename T MRBP_COMMA MRBP_TEMPLATE_PARMS>
-static inline mrb_value call(R (T::*f)(MRBP_TEMPLATE_ARGS), T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)
-{
-    return value((thiz->*f)(MRBP_CALL_ARGS));
-}
-
-template<typename T MRBP_COMMA MRBP_TEMPLATE_PARMS>
-static inline mrb_value call(void (T::*f)(MRBP_TEMPLATE_ARGS), T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)
-{
-    (thiz->*f)(MRBP_CALL_ARGS);
-    return mrbp::value();
-}
+	arg_holder<A##i>::type a##i; get(mrb, mrb->stack[(i)+(offset)+1], a##i);
 
 template<typename R, typename T MRBP_COMMA MRBP_TEMPLATE_PARMS, R (T::*f)(MRBP_TEMPLATE_ARGS)>
 struct MRBP_FUNCTION 
     : function_base<MRBP_FUNCTION<R, T MRBP_COMMA MRBP_TEMPLATE_ARGS, f> >,
       function_aspec<MRBP_NUM_ARGS>
 {
-    static mrb_value Func(mrb_state* mrb, mrb_value self)
+
+    template<typename R>
+    struct call {
+        mrb_value operator()(R (T::*f)(MRBP_TEMPLATE_ARGS), T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)
+        {
+            return value((thiz->*f)(MRBP_CALL_ARGS));
+        }
+    };
+    template<>
+    struct call<void> {
+        mrb_value operator()(void (T::*f)(MRBP_TEMPLATE_ARGS), T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)
+        {
+            (thiz->*f)(MRBP_CALL_ARGS);
+            return mrbp::value();
+        }
+    };
+
+    static mrb_value AS_METHOD(mrb_state* mrb, mrb_value self)
     {
-        T* thiz = (T*)mrb_get_datatype(mrb, self, mrbp::class_def<T>::data_type());
+        T* thiz = 0;
+        get(mrb, self, thiz);
         if (thiz)
         {
-            return Func1(mrb, self, thiz);
+            return MemberFunc1(mrb, self, thiz);
         }
         return mrbp::value();
     }
-    static mrb_value Func1(mrb_state* mrb, mrb_value self, T* thiz)
+    static mrb_value MemberFunc1(mrb_state* mrb, mrb_value self, T* thiz)
     {
         if (mrb->ci->argc >= MRBP_NUM_ARGS)
         {
             BOOST_PP_REPEAT(MRBP_NUM_ARGS, MRBP_GET_ARGS, 0)
-            return call(f, thiz MRBP_COMMA MRBP_CALL_ARGS);
+            return call<R>()(f, thiz MRBP_COMMA MRBP_CALL_ARGS);
         }  
         return mrbp::value();
     }

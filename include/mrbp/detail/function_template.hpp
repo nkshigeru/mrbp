@@ -39,7 +39,7 @@
 // ==> a0, a1, a2
 
 #define MRBP_GET_ARGS(x, i, offset) \
-	A##i a##i; get(mrb, mrb->stack[(i)+(offset)+1], a##i);
+	arg_holder<A##i>::type a##i; get(mrb, mrb->stack[(i)+(offset)+1], a##i);
 
 template<typename R MRBP_COMMA MRBP_TEMPLATE_PARMS>
 static inline mrb_value call(R (*f)(MRBP_TEMPLATE_ARGS) MRBP_COMMA MRBP_FUNTION_ARGS)
@@ -59,20 +59,20 @@ struct MRBP_FUNCTION
     : function_base<MRBP_FUNCTION<R MRBP_COMMA MRBP_TEMPLATE_ARGS, f> >,
       function_aspec<MRBP_NUM_ARGS>
 {
-    static mrb_value Func(mrb_state* mrb, mrb_value self)
+    static mrb_value AS_METHOD(mrb_state* mrb, mrb_value self)
     {
         A0 a0 = 0;
         get(mrb, self, a0);
         if (a0)
         {
-            return Func1(mrb, self, a0);
+            return MemberFunc1(mrb, self, a0);
         }
         return value();
     }
 #if  MRBP_NUM_ARGS == 0
 
 #else
-    static mrb_value Func1(mrb_state* mrb, mrb_value self, A0 a0)
+    static mrb_value MemberFunc1(mrb_state* mrb, mrb_value self, A0 a0)
     {
         if (mrb->ci->argc >= (MRBP_NUM_ARGS-1))
         {
