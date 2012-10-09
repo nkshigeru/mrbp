@@ -59,6 +59,16 @@ struct MRBP_FUNCTION
     : function_base<MRBP_FUNCTION<R MRBP_COMMA MRBP_TEMPLATE_ARGS, f> >,
       function_aspec<MRBP_NUM_ARGS>
 {
+    static mrb_value AS_CLASS_METHOD(mrb_state* mrb, mrb_value self)
+    {
+        if (mrb->ci->argc >= (MRBP_NUM_ARGS))
+        {
+	        BOOST_PP_REPEAT(MRBP_NUM_ARGS, MRBP_GET_ARGS, 0)
+            return call(f, MRBP_CALL_ARGS);
+        }
+        return value();
+    }
+
     static mrb_value AS_METHOD(mrb_state* mrb, mrb_value self)
     {
         A0 a0 = 0;
@@ -79,7 +89,7 @@ struct MRBP_FUNCTION
 	        BOOST_PP_REPEAT_FROM_TO(1, MRBP_NUM_ARGS, MRBP_GET_ARGS, -1)
             return call(f, MRBP_CALL_ARGS);
         }
-        return mrbp::value();
+        return value();
     }
 #endif
 };
