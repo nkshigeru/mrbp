@@ -55,41 +55,26 @@ template<int N>
 struct function_aspec
 {
     static const int NUM_ARGS = N;
-    int aspec()
-    {
-        return ARGS_REQ(N);
-    }
+    static const int ASPEC = ARGS_REQ(N);
 };
 
 template<>
 struct function_aspec<0>
 {
     static const int NUM_ARGS = 0;
-    int aspec()
-    {
-        return ARGS_NONE();
-    }
+    static const int ASPEC = ARGS_NONE();
 };
 
-template<typename D>
-struct function_base {
-    mrb_func_t func()
-    {
-        return &D::Func;
-    }
-};
+struct function_base
+{};
 
 struct empty_function_def : function_aspec<0>
-{
-private:
-	mrb_func_t func();
-	static mrb_func_t Call();
-};
+{};
 
 template<typename T, typename F>
-struct initialize_function : function_base<initialize_function<T, F> >, function_aspec<F::NUM_ARGS>
+struct initialize_function : F
 {
-    static mrb_value Func(mrb_state *mrb, mrb_value self)
+    static mrb_value AS_METHOD(mrb_state *mrb, mrb_value self)
     {
         T* thiz = new T();
 
@@ -103,9 +88,9 @@ struct initialize_function : function_base<initialize_function<T, F> >, function
 };
 
 template<typename T>
-struct initialize_function<T, empty_function_def> : function_base<initialize_function<T, empty_function_def> >, function_aspec<empty_function_def::NUM_ARGS>
+struct initialize_function<T, empty_function_def> : empty_function_def
 {
-    static mrb_value Func(mrb_state *mrb, mrb_value self)
+    static mrb_value AS_METHOD(mrb_state *mrb, mrb_value self)
     {
         T* thiz = new T();
 
@@ -119,6 +104,7 @@ struct initialize_function<T, empty_function_def> : function_base<initialize_fun
 template<typename F, F f>
 struct function;
 
+//function template
 #define MRBP_NUM_ARGS 0
 #include "detail/function_template.hpp"
 #undef MRBP_NUM_ARGS
@@ -139,6 +125,7 @@ struct function;
 #include "detail/function_template.hpp"
 #undef MRBP_NUM_ARGS
 
+//member function template
 #define MRBP_NUM_ARGS 0
 #include "detail/member_function_template.hpp"
 #undef MRBP_NUM_ARGS
@@ -162,6 +149,28 @@ struct function;
 template<typename F, F f>
 struct function_r;
 
+//function r template
+#define MRBP_NUM_ARGS 0
+#include "detail/function_r_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 1
+#include "detail/function_r_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 2
+#include "detail/function_r_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 3
+#include "detail/function_r_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 4
+#include "detail/function_r_template.hpp"
+#undef MRBP_NUM_ARGS
+
+//member function r template
 #define MRBP_NUM_ARGS 0
 #include "detail/member_function_r_template.hpp"
 #undef MRBP_NUM_ARGS

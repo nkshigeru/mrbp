@@ -20,8 +20,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#define MRBP_FUNCTION BOOST_JOIN(member_function_r, MRBP_NUM_ARGS)
-// ==> member_function_r3
+#define MRBP_FUNCTION BOOST_JOIN(function_r, MRBP_NUM_ARGS)
+// ==> function_r3
 
 #if  MRBP_NUM_ARGS == 0
 #  define MRBP_COMMA
@@ -41,50 +41,63 @@
 #define MRBP_GET_ARGS(x, i, offset) \
 	arg_holder<A##i>::type a##i; get(mrb, mrb->stack[(i)+(offset)+1], a##i);
 
-template<typename R, typename T MRBP_COMMA MRBP_TEMPLATE_PARMS, R (T::*f)(mrb_state*, mrb_value MRBP_COMMA MRBP_TEMPLATE_ARGS)>
+template<typename R MRBP_COMMA MRBP_TEMPLATE_PARMS, R (*f)(mrb_state*, mrb_value MRBP_COMMA MRBP_TEMPLATE_ARGS)>
 struct MRBP_FUNCTION 
     : function_base,
       function_aspec<MRBP_NUM_ARGS>
 {
     template<typename R>
     struct call {
-        mrb_value operator()(mrb_state* mrb, mrb_value self, R (T::*f)(mrb_state*, mrb_value MRBP_COMMA MRBP_TEMPLATE_ARGS), T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)
+        mrb_value operator()(mrb_state* mrb, mrb_value self, R (*f)(mrb_state*, mrb_value MRBP_COMMA MRBP_TEMPLATE_ARGS) MRBP_COMMA MRBP_FUNTION_ARGS)
         {
-            return value((thiz->*f)(mrb, self MRBP_COMMA MRBP_CALL_ARGS));
+            return value((*f)(mrb, self MRBP_COMMA MRBP_CALL_ARGS));
         }
     };
     template<>
     struct call<void> {
-        mrb_value operator()(mrb_state* mrb, mrb_value self, void (T::*f)(mrb_state*, mrb_value MRBP_COMMA MRBP_TEMPLATE_ARGS), T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)
+        mrb_value operator()(mrb_state* mrb, mrb_value self, R (*f)(mrb_state*, mrb_value MRBP_COMMA MRBP_TEMPLATE_ARGS) MRBP_COMMA MRBP_FUNTION_ARGS)
         {
-            (thiz->*f)(mrb, self MRBP_COMMA MRBP_CALL_ARGS);
+            (*f)(mrb, self MRBP_COMMA MRBP_CALL_ARGS);
             return value();
         }
     };
 
+    static mrb_value AS_CLASS_METHOD(mrb_state* mrb, mrb_value self)
+    {
+        if (mrb->ci->argc >= (MRBP_NUM_ARGS))
+        {
+	        BOOST_PP_REPEAT(MRBP_NUM_ARGS, MRBP_GET_ARGS, 0)
+            return call<R>()(mrb, self, f, MRBP_CALL_ARGS);
+        }
+        return value();
+    }
+
+#if  MRBP_NUM_ARGS > 0
     static mrb_value AS_METHOD(mrb_state* mrb, mrb_value self)
     {
-        T* thiz = 0;
-        get(mrb, self, thiz);
-        if (thiz)
+        A0 a0 = 0;
+        get(mrb, self, a0);
+        if (a0)
         {
-            return MemberFunc1(mrb, self, thiz);
+            return MemberFunc1(mrb, self, a0);
         }
-        return mrbp::value();
+        return value();
     }
-    static mrb_value MemberFunc1(mrb_state* mrb, mrb_value self, T* thiz)
+    
+    static mrb_value MemberFunc1(mrb_state* mrb, mrb_value self, A0 a0)
     {
-        if (mrb->ci->argc >= MRBP_NUM_ARGS)
+        if (mrb->ci->argc >= (MRBP_NUM_ARGS-1))
         {
-            BOOST_PP_REPEAT(MRBP_NUM_ARGS, MRBP_GET_ARGS, 0)
-            return call<R>()(mrb, self, f, thiz MRBP_COMMA MRBP_CALL_ARGS);
-        }  
-        return mrbp::value();
+	        BOOST_PP_REPEAT_FROM_TO(1, MRBP_NUM_ARGS, MRBP_GET_ARGS, -1)
+            return call<R>()(mrb, self, f, MRBP_CALL_ARGS);
+        }
+        return value();
     }
+#endif //MRBP_NUM_ARGS > 0
 };
 
-template<typename R, typename T MRBP_COMMA MRBP_TEMPLATE_PARMS, R (T::*f)(mrb_state*, mrb_value MRBP_COMMA MRBP_TEMPLATE_ARGS)>
-struct function_r<R (T::*)(mrb_state*, mrb_value MRBP_COMMA MRBP_TEMPLATE_ARGS), f> : public MRBP_FUNCTION<R, T MRBP_COMMA MRBP_TEMPLATE_ARGS, f> {};
+template<typename R MRBP_COMMA MRBP_TEMPLATE_PARMS, R (*f)(mrb_state*, mrb_value MRBP_COMMA MRBP_TEMPLATE_ARGS)>
+struct function_r<R (*)(mrb_state*, mrb_value MRBP_COMMA MRBP_TEMPLATE_ARGS), f> : public MRBP_FUNCTION<R MRBP_COMMA MRBP_TEMPLATE_ARGS, f> {};
 
 #undef MRBP_FUNCTION
 #undef MRBP_COMMA

@@ -43,7 +43,7 @@
 
 template<typename R, typename T MRBP_COMMA MRBP_TEMPLATE_PARMS, R (T::*f)(MRBP_TEMPLATE_ARGS)>
 struct MRBP_FUNCTION 
-    : function_base<MRBP_FUNCTION<R, T MRBP_COMMA MRBP_TEMPLATE_ARGS, f> >,
+    : function_base,
       function_aspec<MRBP_NUM_ARGS>
 {
 

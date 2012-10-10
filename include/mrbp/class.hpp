@@ -69,72 +69,132 @@ struct class_def<CLS> : public class_def_base<CLS>  \
 }
 
 template<typename T>
-struct class_init
+struct class_init_under_module;
+
+struct module_init
+{
+    module_init(mrb_state* mrb, const char* name) : mrb(mrb)
+    {
+        cls = mrb_define_module(mrb, name);
+    }
+    
+    module_init& define_module_function(const char* func_name, mrb_func_t func, int aspec)
+    {
+        mrb_define_module_function(mrb, cls, func_name, func, aspec);
+        return *this;
+    }
+    
+    template<typename F>
+    module_init& define_module_function(const char* func_name, F&)
+    {
+        return define_module_function(func_name, &F::AS_CLASS_METHOD, F::ASPEC);
+    }
+    
+    template<typename C>
+    class_init_under_module<C> begin_class_init()
+    {
+        return class_init_under_module<C>(*this);
+    }
+    
+    mrb_state* mrb;
+    struct RClass* cls;
+};
+
+template<typename T, typename D>
+struct class_init_impl
 {
     typedef class_def<T> class_def_t;
 
-    class_init<T>(mrb_state* mrb) : mrb(mrb)
+    class_init_impl(mrb_state* mrb) : mrb(mrb) {}
+    class_init_impl(mrb_state* mrb, struct RClass* cls) : mrb(mrb), cls(cls) {}
+
+    template<typename F>
+    D& define_initialize(F&)
+    {
+        mrb_define_method(mrb, cls, "initialize", &initialize_function<T, F>::AS_METHOD, initialize_function<T, F>::ASPEC);
+        return static_cast<D&>(*this);
+    }
+
+    D& define_initialize()
+    {
+		return define_initialize(empty_function_def());
+    }
+
+    D& define_method(const char* func_name, mrb_func_t func, int aspec)
+    {
+        mrb_define_method(mrb, cls, func_name, func, aspec);
+        return static_cast<D&>(*this);
+    }
+
+    template<typename F>
+    D& define_method(const char* func_name, F&)
+    {
+        return define_method(func_name, &F::AS_METHOD, F::ASPEC);
+    }
+
+    D& define_class_method(const char* func_name, mrb_func_t func, int aspec)
+    {
+        mrb_define_class_method(mrb, cls, func_name, func, aspec);
+        return static_cast<D&>(*this);
+    }
+
+    template<typename F>
+    D& define_class_method(const char* func_name, F&)
+    {
+        return define_class_method(func_name, &F::AS_CLASS_METHOD, F::ASPEC);
+    }
+    
+    template<typename V>
+    D& define_const(const char* name, V v)
+    {
+        mrb_define_const(mrb, cls, name, value(v));
+        return static_cast<D&>(*this);
+    }
+    
+    mrb_state* mrb;
+    struct RClass* cls;
+    
+private:
+    class_init_impl();
+};
+
+template<typename T>
+struct class_init : class_init_impl<T, class_init<T> >
+{
+    typedef class_init_impl<T, class_init<T> > super_t;
+
+    class_init(mrb_state* mrb) : super_t(mrb)
     {
         cls = mrb_define_class(mrb, class_def_t::name(), mrb->object_class);
         MRB_SET_INSTANCE_TT(cls, MRB_TT_DATA);
     }
 
-    class_init<T>(mrb_state* mrb, struct RClass* cls) : mrb(mrb), cls(cls)
+    class_init(mrb_state* mrb, struct RClass* cls) : super_t(mrb, cls)
     {
     }
 	
-    template<typename FDef>
-    class_init<T>& define_initialize(FDef& fdef)
-    {
-        initialize_function<T, FDef> wrap_initialize;
-        mrb_define_method(mrb, cls, "initialize", wrap_initialize.func(), wrap_initialize.aspec());
-        return *this;
-    }
-
-    class_init<T>& define_initialize()
-    {
-		return define_initialize(empty_function_def());
-    }
-
-    class_init<T>& define_method(const char* func_name, mrb_func_t func, int aspec)
-    {
-        mrb_define_method(mrb, cls, func_name, func, aspec);
-        return *this;
-    }
-
-    template<typename F>
-    class_init<T>& define_method(const char* func_name, F& f)
-    {
-        return define_method(func_name, &F::AS_METHOD, f.aspec());
-    }
-
-    class_init<T>& define_class_method(const char* func_name, mrb_func_t func, int aspec)
-    {
-        mrb_define_class_method(mrb, cls, func_name, func, aspec);
-        return *this;
-    }
-
-    template<typename F>
-    class_init<T>& define_class_method(const char* func_name, F& f)
-    {
-        return define_class_method(func_name, &F::AS_CLASS_METHOD, f.aspec());
-    }
-    
-    template<typename V>
-    class_init<T>& define_const(const char* name, V v)
-    {
-        mrb_define_const(mrb, cls, name, value(v));
-        return *this;
-    }
-	
-	mrb_state* mrb;
-    struct RClass* cls;
-
 private:
-    class_init<T>();
-	class_init<T>(const class_init<T>&);
-	class_init<T>& operator=(const class_init<T>&);
+    class_init();
     
+};
+
+template<typename T>
+struct class_init_under_module : class_init_impl<T, class_init_under_module<T> >
+{
+    typedef class_init_impl<T, class_init_under_module<T> > super_t;
+
+    class_init_under_module(module_init& outer) : super_t(outer.mrb), outer(outer)
+    {
+        cls = mrb_define_class_under(mrb, outer.cls, class_def_t::name(), mrb->object_class);
+        MRB_SET_INSTANCE_TT(cls, MRB_TT_DATA);
+    }
+    
+    module_init& end_class_init()
+    {
+        return outer;
+    }
+    
+    module_init& outer;
 };
 
 }

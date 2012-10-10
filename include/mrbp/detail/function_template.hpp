@@ -41,34 +41,38 @@
 #define MRBP_GET_ARGS(x, i, offset) \
 	arg_holder<A##i>::type a##i; get(mrb, mrb->stack[(i)+(offset)+1], a##i);
 
-template<typename R MRBP_COMMA MRBP_TEMPLATE_PARMS>
-static inline mrb_value call(R (*f)(MRBP_TEMPLATE_ARGS) MRBP_COMMA MRBP_FUNTION_ARGS)
-{
-    return value((*f)(MRBP_CALL_ARGS));
-}
-
-template<MRBP_TEMPLATE_PARMS>
-static inline mrb_value call(void (*f)(MRBP_TEMPLATE_ARGS) MRBP_COMMA MRBP_FUNTION_ARGS)
-{
-    (*f)(MRBP_CALL_ARGS);
-    return mrbp::value();
-}
-
 template<typename R MRBP_COMMA MRBP_TEMPLATE_PARMS, R (*f)(MRBP_TEMPLATE_ARGS)>
 struct MRBP_FUNCTION 
-    : function_base<MRBP_FUNCTION<R MRBP_COMMA MRBP_TEMPLATE_ARGS, f> >,
+    : function_base,
       function_aspec<MRBP_NUM_ARGS>
 {
+    template<typename R>
+    struct call {
+        mrb_value operator()(R (*f)(MRBP_TEMPLATE_ARGS) MRBP_COMMA MRBP_FUNTION_ARGS)
+        {
+            return value((*f)(MRBP_CALL_ARGS));
+        }
+    };
+    template<>
+    struct call<void> {
+        mrb_value operator()(void (*f)(MRBP_TEMPLATE_ARGS) MRBP_COMMA MRBP_FUNTION_ARGS)
+        {
+            (*f)(MRBP_CALL_ARGS);
+            return value();
+        }
+    };
+
     static mrb_value AS_CLASS_METHOD(mrb_state* mrb, mrb_value self)
     {
         if (mrb->ci->argc >= (MRBP_NUM_ARGS))
         {
 	        BOOST_PP_REPEAT(MRBP_NUM_ARGS, MRBP_GET_ARGS, 0)
-            return call(f, MRBP_CALL_ARGS);
+            return call<R>()(f MRBP_COMMA MRBP_CALL_ARGS);
         }
         return value();
     }
 
+#if  MRBP_NUM_ARGS > 0
     static mrb_value AS_METHOD(mrb_state* mrb, mrb_value self)
     {
         A0 a0 = 0;
@@ -79,19 +83,16 @@ struct MRBP_FUNCTION
         }
         return value();
     }
-#if  MRBP_NUM_ARGS == 0
-
-#else
     static mrb_value MemberFunc1(mrb_state* mrb, mrb_value self, A0 a0)
     {
         if (mrb->ci->argc >= (MRBP_NUM_ARGS-1))
         {
 	        BOOST_PP_REPEAT_FROM_TO(1, MRBP_NUM_ARGS, MRBP_GET_ARGS, -1)
-            return call(f, MRBP_CALL_ARGS);
+            return call<R>()(f, MRBP_CALL_ARGS);
         }
         return value();
     }
-#endif
+#endif //MRBP_NUM_ARGS > 0
 };
 
 template<typename R MRBP_COMMA MRBP_TEMPLATE_PARMS, R (*f)(MRBP_TEMPLATE_ARGS)>

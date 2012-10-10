@@ -29,6 +29,9 @@
 
 #include <stdexcept>
 
+#include <boost/type_traits.hpp>
+#include <boost/utility/enable_if.hpp>
+
 namespace mrbp {
 
 //nil
@@ -133,15 +136,16 @@ static inline void get(mrb_state* mrb, mrb_value value, mrb_int& out)
     }
 }
 
-static inline void get(mrb_state* mrb, mrb_value value, mrb_float& out)
+template<typename T>
+static inline void get(mrb_state* mrb, mrb_value value, T& out, typename boost::enable_if<boost::is_floating_point<T> >::type* = 0)
 {
     switch (mrb_type(value))
     {
     case MRB_TT_FLOAT:
-        out = mrb_float(value);
+        out = static_cast<T>(mrb_float(value));
         break;
     case MRB_TT_FIXNUM:
-	    out = static_cast<mrb_int>(mrb_fixnum(value));
+	    out = static_cast<T>(mrb_fixnum(value));
         break;
     case MRB_TT_FALSE:
         out = 0;
