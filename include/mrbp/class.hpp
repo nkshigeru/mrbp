@@ -90,6 +90,13 @@ struct module_init
         return define_module_function(func_name, &F::AS_CLASS_METHOD, F::ASPEC);
     }
     
+    template<typename V>
+    module_init& define_const(const char* name, V v)
+    {
+        mrb_define_const(mrb, cls, name, value(v));
+        return *this;
+    }
+    
     template<typename C>
     class_init_under_module<C> begin_class_init()
     {
