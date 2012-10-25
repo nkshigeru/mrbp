@@ -41,7 +41,7 @@
 #define MRBP_GET_ARGS(x, i, offset) \
 	arg_holder<A##i>::type a##i; get(mrb, mrb->stack[(i)+(offset)+1], a##i);
 
-template<typename R, typename T MRBP_COMMA MRBP_TEMPLATE_PARMS, R (T::*f)(MRBP_TEMPLATE_ARGS)>
+template<typename R, typename T MRBP_COMMA MRBP_TEMPLATE_PARMS, typename F, F f>
 struct MRBP_FUNCTION 
     : function_base,
       function_aspec<MRBP_NUM_ARGS>
@@ -49,14 +49,14 @@ struct MRBP_FUNCTION
 
     template<typename R>
     struct call {
-        mrb_value operator()(R (T::*f)(MRBP_TEMPLATE_ARGS), T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)
+        mrb_value operator()(F f, T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)
         {
             return value((thiz->*f)(MRBP_CALL_ARGS));
         }
     };
     template<>
     struct call<void> {
-        mrb_value operator()(void (T::*f)(MRBP_TEMPLATE_ARGS), T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)
+        mrb_value operator()(F f, T* thiz MRBP_COMMA MRBP_FUNTION_ARGS)
         {
             (thiz->*f)(MRBP_CALL_ARGS);
             return mrbp::value();
@@ -85,7 +85,10 @@ struct MRBP_FUNCTION
 };
 
 template<typename R, typename T MRBP_COMMA MRBP_TEMPLATE_PARMS, R (T::*f)(MRBP_TEMPLATE_ARGS)>
-struct function<R (T::*)(MRBP_TEMPLATE_ARGS), f> : public MRBP_FUNCTION<R, T MRBP_COMMA MRBP_TEMPLATE_ARGS, f> {};
+struct function<R (T::*)(MRBP_TEMPLATE_ARGS), f> : public MRBP_FUNCTION<R, T MRBP_COMMA MRBP_TEMPLATE_ARGS, R (T::*)(MRBP_TEMPLATE_ARGS), f> {};
+
+template<typename R, typename T MRBP_COMMA MRBP_TEMPLATE_PARMS, R (T::*f)(MRBP_TEMPLATE_ARGS)const>
+struct function<R (T::*)(MRBP_TEMPLATE_ARGS)const, f> : public MRBP_FUNCTION<R, T MRBP_COMMA MRBP_TEMPLATE_ARGS, R (T::*)(MRBP_TEMPLATE_ARGS)const, f> {};
 
 #undef MRBP_FUNCTION
 #undef MRBP_COMMA
