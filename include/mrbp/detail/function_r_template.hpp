@@ -75,7 +75,7 @@ struct MRBP_FUNCTION
 #if  MRBP_NUM_ARGS > 0
     static mrb_value AS_METHOD(mrb_state* mrb, mrb_value self)
     {
-        A0 a0 = 0;
+        arg_holder<A0>::type a0 = 0;
         get(mrb, self, a0);
         if (a0)
         {
