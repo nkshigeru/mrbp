@@ -133,6 +133,22 @@ struct function;
 #include "detail/function_template.hpp"
 #undef MRBP_NUM_ARGS
 
+#define MRBP_NUM_ARGS 7
+#include "detail/function_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 8
+#include "detail/function_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 9
+#include "detail/function_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 10
+#include "detail/function_template.hpp"
+#undef MRBP_NUM_ARGS
+
 //member function template
 #define MRBP_NUM_ARGS 0
 #include "detail/member_function_template.hpp"
@@ -159,6 +175,22 @@ struct function;
 #undef MRBP_NUM_ARGS
 
 #define MRBP_NUM_ARGS 6
+#include "detail/member_function_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 7
+#include "detail/member_function_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 8
+#include "detail/member_function_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 9
+#include "detail/member_function_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 10
 #include "detail/member_function_template.hpp"
 #undef MRBP_NUM_ARGS
 
@@ -194,6 +226,22 @@ struct function_r;
 #include "detail/function_r_template.hpp"
 #undef MRBP_NUM_ARGS
 
+#define MRBP_NUM_ARGS 7
+#include "detail/function_r_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 8
+#include "detail/function_r_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 9
+#include "detail/function_r_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 10
+#include "detail/function_r_template.hpp"
+#undef MRBP_NUM_ARGS
+
 //member function r template
 #define MRBP_NUM_ARGS 0
 #include "detail/member_function_r_template.hpp"
@@ -220,6 +268,22 @@ struct function_r;
 #undef MRBP_NUM_ARGS
 
 #define MRBP_NUM_ARGS 6
+#include "detail/member_function_r_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 7
+#include "detail/member_function_r_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 8
+#include "detail/member_function_r_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 9
+#include "detail/member_function_r_template.hpp"
+#undef MRBP_NUM_ARGS
+
+#define MRBP_NUM_ARGS 10
 #include "detail/member_function_r_template.hpp"
 #undef MRBP_NUM_ARGS
 
