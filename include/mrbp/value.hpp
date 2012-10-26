@@ -178,6 +178,14 @@ static inline void get(mrb_state* mrb, mrb_value value, T*& out)
     out = (T*)mrb_get_datatype(mrb, value, mrbp::class_def<T>::data_type());
 }
 
+template<typename T>
+static inline T get(mrb_state* mrb, mrb_value value)
+{
+    T out;
+    get(mrb, value, out);
+    return out;
+}
+
 }
 
 #endif /*MRBP_VALUE_H_*/
