@@ -67,7 +67,7 @@ struct MRBP_FUNCTION
         if (mrb->ci->argc >= (MRBP_NUM_ARGS))
         {
 	        BOOST_PP_REPEAT(MRBP_NUM_ARGS, MRBP_GET_ARGS, 0)
-            return call<R>()(mrb, self, f, MRBP_CALL_ARGS);
+            return call<R>()(mrb, self, f MRBP_COMMA MRBP_CALL_ARGS);
         }
         return value();
     }
