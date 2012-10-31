@@ -41,33 +41,33 @@
 #define MRBP_GET_ARGS(x, i, offset) \
 	arg_holder<A##i>::type a##i; get(mrb, mrb->stack[(i)+(offset)+1], a##i);
 
-template<typename R MRBP_COMMA MRBP_TEMPLATE_PARMS, R (*f)(MRBP_TEMPLATE_ARGS)>
+template<typename R MRBP_COMMA MRBP_TEMPLATE_PARMS, typename F, F f>
 struct MRBP_FUNCTION 
     : function_base,
       function_aspec<MRBP_NUM_ARGS>
 {
     template<typename R>
     struct call {
-        mrb_value operator()(R (*f)(MRBP_TEMPLATE_ARGS) MRBP_COMMA MRBP_FUNTION_ARGS)
+        mrb_value operator()(MRBP_FUNTION_ARGS)
         {
             return value((*f)(MRBP_CALL_ARGS));
         }
     };
     template<>
     struct call<void> {
-        mrb_value operator()(void (*f)(MRBP_TEMPLATE_ARGS) MRBP_COMMA MRBP_FUNTION_ARGS)
+        mrb_value operator()(MRBP_FUNTION_ARGS)
         {
             (*f)(MRBP_CALL_ARGS);
             return value();
         }
     };
 
-    static mrb_value AS_CLASS_METHOD(mrb_state* mrb, mrb_value self)
+    static mrb_value AS_CLASS_METHOD(mrb_state* mrb, mrb_value /*self*/)
     {
         if (mrb->ci->argc >= (MRBP_NUM_ARGS))
         {
 	        BOOST_PP_REPEAT(MRBP_NUM_ARGS, MRBP_GET_ARGS, 0)
-            return call<R>()(f MRBP_COMMA MRBP_CALL_ARGS);
+            return call<R>()(MRBP_CALL_ARGS);
         }
         return value();
     }
@@ -88,7 +88,7 @@ struct MRBP_FUNCTION
         if (mrb->ci->argc >= (MRBP_NUM_ARGS-1))
         {
 	        BOOST_PP_REPEAT_FROM_TO(1, MRBP_NUM_ARGS, MRBP_GET_ARGS, -1)
-            return call<R>()(f, MRBP_CALL_ARGS);
+            return call<R>()(MRBP_CALL_ARGS);
         }
         return value();
     }
@@ -96,7 +96,10 @@ struct MRBP_FUNCTION
 };
 
 template<typename R MRBP_COMMA MRBP_TEMPLATE_PARMS, R (*f)(MRBP_TEMPLATE_ARGS)>
-struct function<R (*)(MRBP_TEMPLATE_ARGS), f> : public MRBP_FUNCTION<R MRBP_COMMA MRBP_TEMPLATE_ARGS, f> {};
+struct function<R (*)(MRBP_TEMPLATE_ARGS), f> : public MRBP_FUNCTION<R MRBP_COMMA MRBP_TEMPLATE_ARGS, R (*)(MRBP_TEMPLATE_ARGS), f> {};
+
+template<typename R MRBP_COMMA MRBP_TEMPLATE_PARMS, R (__stdcall *f)(MRBP_TEMPLATE_ARGS)>
+struct function<R (__stdcall *)(MRBP_TEMPLATE_ARGS), f> : public MRBP_FUNCTION<R MRBP_COMMA MRBP_TEMPLATE_ARGS, R (__stdcall *)(MRBP_TEMPLATE_ARGS), f> {};
 
 #undef MRBP_FUNCTION
 #undef MRBP_COMMA
