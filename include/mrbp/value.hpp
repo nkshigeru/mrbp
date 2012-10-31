@@ -105,12 +105,18 @@ static inline bool check<mrb_value>(mrb_value value)
 	return true;
 }
 
-static inline void get(mrb_state* mrb, mrb_value value, bool& out)
+//bool
+template<typename T>
+static inline void get(mrb_state* mrb, mrb_value value, T& out, 
+    typename boost::enable_if< boost::is_same<T, bool> >::type* = 0)
 {
 	out = (mrb_type(value) != MRB_TT_FALSE);
 }
 
-static inline void get(mrb_state* mrb, mrb_value value, mrb_int& out)
+//fixnum
+template<typename T>
+static inline void get(mrb_state* mrb, mrb_value value, T& out, 
+    typename boost::enable_if_c< boost::is_integral<T>::value && !boost::is_same<T, bool>::value >::type* = 0)
 {
     switch (mrb_type(value))
     {
@@ -136,8 +142,10 @@ static inline void get(mrb_state* mrb, mrb_value value, mrb_int& out)
     }
 }
 
+//float
 template<typename T>
-static inline void get(mrb_state* mrb, mrb_value value, T& out, typename boost::enable_if<boost::is_floating_point<T> >::type* = 0)
+static inline void get(mrb_state* mrb, mrb_value value, T& out,
+    typename boost::enable_if<boost::is_floating_point<T> >::type* = 0)
 {
     switch (mrb_type(value))
     {
