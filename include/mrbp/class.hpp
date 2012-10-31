@@ -102,6 +102,11 @@ struct module_init
     {
         return class_init_under_module<C>(*this);
     }
+    template<typename C>
+    class_init_under_module<C> begin_class_init(const char* name)
+    {
+        return class_init_under_module<C>(*this, name);
+    }
     
     mrb_state* mrb;
     struct RClass* cls;
@@ -193,6 +198,11 @@ struct class_init_under_module : class_init_impl<T, class_init_under_module<T> >
     class_init_under_module(module_init& outer) : super_t(outer.mrb), outer(outer)
     {
         cls = mrb_define_class_under(mrb, outer.cls, class_def_t::name(), mrb->object_class);
+        MRB_SET_INSTANCE_TT(cls, MRB_TT_DATA);
+    }
+    class_init_under_module(module_init& outer, const char* name) : super_t(outer.mrb), outer(outer)
+    {
+        cls = mrb_define_class_under(mrb, outer.cls, name, mrb->object_class);
         MRB_SET_INSTANCE_TT(cls, MRB_TT_DATA);
     }
     
