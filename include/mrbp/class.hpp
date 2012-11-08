@@ -55,7 +55,7 @@ struct class_def_base
     }
 };
 
-#define MRBP_DEFINE_CLASS(CLS, NAME)                \
+#define MRBP_DEFINE_CLASS(CLS)                      \
 namespace mrbp                                      \
 {                                                   \
 template<>                                          \
@@ -63,7 +63,7 @@ struct class_def<CLS> : public class_def_base<CLS>  \
 {                                                   \
     static const char* name()                       \
     {                                               \
-        return NAME;                                \
+        return #CLS;                                \
     }                                               \
 };                                                  \
 }
@@ -97,11 +97,6 @@ struct module_init
         return *this;
     }
     
-    template<typename C>
-    class_init_under_module<C> begin_class_init()
-    {
-        return class_init_under_module<C>(*this);
-    }
     template<typename C>
     class_init_under_module<C> begin_class_init(const char* name)
     {
@@ -175,9 +170,9 @@ struct class_init : class_init_impl<T, class_init<T> >
 {
     typedef class_init_impl<T, class_init<T> > super_t;
 
-    class_init(mrb_state* mrb) : super_t(mrb)
+    class_init(mrb_state* mrb, const char* name) : super_t(mrb)
     {
-        cls = mrb_define_class(mrb, class_def_t::name(), mrb->object_class);
+        cls = mrb_define_class(mrb, name, mrb->object_class);
         MRB_SET_INSTANCE_TT(cls, MRB_TT_DATA);
     }
 
@@ -195,11 +190,6 @@ struct class_init_under_module : class_init_impl<T, class_init_under_module<T> >
 {
     typedef class_init_impl<T, class_init_under_module<T> > super_t;
 
-    class_init_under_module(module_init& outer) : super_t(outer.mrb), outer(outer)
-    {
-        cls = mrb_define_class_under(mrb, outer.cls, class_def_t::name(), mrb->object_class);
-        MRB_SET_INSTANCE_TT(cls, MRB_TT_DATA);
-    }
     class_init_under_module(module_init& outer, const char* name) : super_t(outer.mrb), outer(outer)
     {
         cls = mrb_define_class_under(mrb, outer.cls, name, mrb->object_class);

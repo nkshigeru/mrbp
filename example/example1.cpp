@@ -91,13 +91,13 @@ public:
     }
 };
 
-MRBP_DEFINE_CLASS(MyClass, "MyClass")
+MRBP_DEFINE_CLASS(MyClass)
 
 int main()
 {
     mrb_state* mrb = mrb_open();
 
-    mrbp::class_init<MyClass>(mrb)
+    mrbp::class_init<MyClass>(mrb, "MyClass")
         .define_initialize()
         .define_method("VoidFunction0", mrbp::function<void (MyClass::*)(), &MyClass::VoidFunction0>())
         .define_method("IntFunction0", mrbp::function<int (MyClass::*)(), &MyClass::IntFunction0>())
